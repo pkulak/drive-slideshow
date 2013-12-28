@@ -5,7 +5,6 @@ var docHeight;
 var screenRatio;
 var started = new Date().getTime();
 var accessToken;
-var isFullscreen = false;
 
 $(function() {
   handleResize();
@@ -16,14 +15,6 @@ $(function() {
       accessToken = token;
       retrieveImages();
       displayImages();
-    }
-  });
-
-  $("body").click(function() {
-    if (isFullscreen) {
-      document.body.webkitExitFullscreen();
-    } else {
-      document.body.webkitRequestFullscreen();
     }
   });
 });
