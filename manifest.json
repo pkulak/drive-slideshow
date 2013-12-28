@@ -1,9 +1,9 @@
 {
   "name": "Drive Slideshow",
-  "version": "1.0",
+  "version": "1.0.1",
   "manifest_version": 2,
   "description": "Use your photos in Google Drive for a slideshow.",
-  "permissions": ["identity"],
+  "permissions": ["identity", "fullscreen"],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi7Jk6D/LRZ0pw7YbzspRRCkgyLi5wqMRtKipIb48yymvWN+B4YqZ+ztzPSWiL5tX3ueJtWkeJ9mQvBMPiKd3IddDwdiT9d7NZcvXCxwDlb9qLrqG7328V+DSoDBb2WPdoTUHbSj6FtG4jlcC/HTGqgHjLpEQTFI6K5P6aKvL0VpSEdd7emrgocm4cES+D83fuEaKv13JCrlC8zHGjI6EeGexk7CX1oNkykc3qkwrgjH+s+nSAay4HEOItIsxS5JRE566i5mt2CPqLjjPfAHruQ3ouWlAe2n15Zj4Vg3eXzmRp73vULBuxPxD/r09o7WOrm/3O9e+d/4jxPomVLwyqQIDAQAB",
   "app": {
     "background": {
