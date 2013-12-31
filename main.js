@@ -26,7 +26,7 @@ function handleResize() {
 }
 
 function displayImages() {
-  if (new Date().getTime() - started > 1200000) {
+  if (new Date().getTime() - started > 1000*60*20) {
     pause();
     return;
   }
@@ -165,7 +165,6 @@ function pause() {
   $("#title").css("cursor", "pointer");
 
   $("#title").click(function(e) {
-    e.preventDefault();
     started = new Date().getTime();
     $("#title").unbind("click");
     $("#title").css("cursor", "auto");
