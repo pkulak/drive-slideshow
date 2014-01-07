@@ -3,7 +3,6 @@ var loaded = false;
 var docWidth;
 var docHeight;
 var screenRatio;
-var started = new Date().getTime();
 var accessToken;
 
 $(function() {
@@ -25,10 +24,18 @@ function handleResize() {
   screenRatio = docWidth / docHeight;
 }
 
-function displayImages() {
-  if (new Date().getTime() - started > 1000*60*20) {
-    pause();
+function displayImages(newState) {
+  if (!newState) {
+    chrome.idle.queryState(60, function(newState) {
+      displayImages(newState)
+    })
     return;
+  } else {
+    if (newState == "locked") {
+      console.log("Screen locked. Waiting five seconds.")
+      setTimeout(displayImages, 5000);
+      return;
+    }
   }
 
   if (images.length == 0) {
@@ -157,21 +164,6 @@ function downloadFile(file, callback) {
   } else {
     callback(null);
   }
-}
-
-function pause() {
-  $("#image").hide();
-  $("#title").text("Paused to save bandwidth. Click here to resume.");
-  $("#title").css("cursor", "pointer");
-
-  $("#title").click(function(e) {
-    started = new Date().getTime();
-    $("#title").unbind("click");
-    $("#title").css("cursor", "auto");
-    $("#title").text("Loading next image...");
-    $("#image").show();
-    displayImages();
-  });
 }
 
 function gapiRequest(args) {
