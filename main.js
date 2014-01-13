@@ -45,7 +45,7 @@ function displayImages(newState) {
 
   currentIndex = Math.floor(Math.random() * images.length);
   console.log("Downloading " + currentIndex);
-  var file = images[currentIndex];
+  var id = images[currentIndex];
   var done = false;
   var title = null;
 
@@ -56,58 +56,60 @@ function displayImages(newState) {
     done = true;
   }
 
-  downloadFile(file, function(blob) {
-    var img = $("#image");
-    var width;
-    var height;
+  getFile(id, function(file) {
+    downloadFile(file, function(blob) {
+      var img = $("#image");
+      var width;
+      var height;
 
-    document.getElementById("image").onload = function() {
-      onDone();
-      document.getElementById("image").onload = null;
+      document.getElementById("image").onload = function() {
+        onDone();
+        document.getElementById("image").onload = null;
+        
+        var imgRatio = img.width() / img.height();
+
+        if (screenRatio < imgRatio) {
+          var width = docWidth;
+          var height = (docWidth / img.width()) * img.height();
+          img.css("margin-top", ((docHeight - height) / 2) + "px");
+          img.css("margin-left", 0);
+        } else {
+          var width = (docHeight / img.height()) * img.width();
+          var height = docHeight;
+          img.css("margin-top", 0);
+          img.css("margin-left", ((docWidth - width) / 2) + "px");
+        }
+
+        img.attr("width", width);
+        img.attr("height", height);
+
+        img.fadeIn(500);
+      };
+
+      img.fadeOut(500, function() {
+        img.removeAttr("width");
+        img.removeAttr("height");
+        document.getElementById("image").src = window.URL.createObjectURL(blob);
+      });
       
-      var imgRatio = img.width() / img.height();
-
-      if (screenRatio < imgRatio) {
-        var width = docWidth;
-        var height = (docWidth / img.width()) * img.height();
-        img.css("margin-top", ((docHeight - height) / 2) + "px");
-        img.css("margin-left", 0);
-      } else {
-        var width = (docHeight / img.height()) * img.width();
-        var height = docHeight;
-        img.css("margin-top", 0);
-        img.css("margin-left", ((docWidth - width) / 2) + "px");
-      }
-
-      img.attr("width", width);
-      img.attr("height", height);
-
-      img.fadeIn(500);
-    };
-
-    img.fadeOut(500, function() {
-      img.removeAttr("width");
-      img.removeAttr("height");
-      document.getElementById("image").src = window.URL.createObjectURL(blob);
+      setTimeout(displayImages, 5000);
     });
-    
-    setTimeout(displayImages, 5000);
-  });
 
-  getFile(file.parents[0].id, function(file) {
-    title = file.title;
-    onDone();
+    getFile(file.parents[0].id, function(file) {
+      title = file.title;
+      onDone();
+    });
   });
 }
 
 function retrieveImages() {
   retrieveAllFiles(function(list) {
     $(list).each(function() {
-      if (this.imageMediaMetadata && !this.labels.trashed && this.mimeType.match(/image\/(png)|(jpg)|(jpeg)/)) {
+      if (this.imageMediaMetadata) {
         var area = this.imageMediaMetadata.width * this.imageMediaMetadata.height;
 
         if (area > 122500) {
-          images.push(this);
+          images.push(this.id);
           console.log(images.length);
         }
       }
@@ -130,7 +132,7 @@ function retrieveAllFiles(callback) {
     if (nextPageToken) {
       gapiRequest({
         path: "/drive/v2/files",
-        params: {pageToken: nextPageToken},
+        params: {pageToken: nextPageToken, "maxResults": 1000},
         callback: retrievePageOfFiles
       });
     } else {
@@ -140,6 +142,7 @@ function retrieveAllFiles(callback) {
 
   gapiRequest({
     path: "/drive/v2/files",
+    params: {"maxResults": 100, "q": "trashed=false and (mimeType = 'image/jpeg' or mimeType = 'image/png')"},
     callback: retrievePageOfFiles
   });
 }
