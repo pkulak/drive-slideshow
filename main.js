@@ -4,6 +4,7 @@ var docWidth;
 var docHeight;
 var screenRatio;
 var accessToken;
+var errorSleep = 2500;
 
 $(function() {
   handleResize();
@@ -58,6 +59,12 @@ function displayImages(newState) {
 
   getFile(id, function(file) {
     downloadFile(file, function(blob) {
+      if (!blob) {
+        console.log("File download error.")
+        setTimeout(displayImages, 1);
+        return
+      }
+
       var img = $("#image");
       var width;
       var height;
@@ -132,7 +139,7 @@ function retrieveAllFiles(callback) {
     if (nextPageToken) {
       gapiRequest({
         path: "/drive/v2/files",
-        params: {pageToken: nextPageToken, "maxResults": 1000},
+        params: {pageToken: nextPageToken, "maxResults": 1000, "q": "trashed=false and (mimeType = 'image/jpeg' or mimeType = 'image/png')"},
         callback: retrievePageOfFiles
       });
     } else {
@@ -156,6 +163,14 @@ function downloadFile(file, callback) {
     xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
 
     xhr.onload = function() {
+      if (this.status != 200) {
+        console.log("Response not 200 (" + this.status + "): sleeping for " + errorSleep)
+        setTimeout(callback, errorSleep);
+        errorSleep *= 2;
+        return;
+      }
+
+      errorSleep = 1000;
       callback(new Blob([this.response], {type: file.mimeType}));
     };
 
