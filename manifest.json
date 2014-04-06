@@ -1,6 +1,6 @@
 {
   "name": "Drive Slideshow",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "manifest_version": 2,
   "description": "Use your photos in Google Drive for a slideshow.",
   "permissions": ["identity", "idle"],
