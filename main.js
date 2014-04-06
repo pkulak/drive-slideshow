@@ -192,7 +192,6 @@ function downloadFile(file, callback) {
     };
 
     xhr.onerror = function() {
-      console.log("Error: " + e.target.status);
       callback(null);
     };
 
