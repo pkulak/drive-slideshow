@@ -17,6 +17,19 @@ $(function() {
       displayImages();
     }
   });
+
+  window.setInterval(function() {
+    chrome.identity.removeCachedAuthToken({token: accessToken}, function() {
+      chrome.identity.getAuthToken({interactive: false}, function(token) {
+        if (token) {
+          console.log("Refreshed the token: " + token);
+          accessToken = token;
+        } else {
+          console.log("Could not refresh token!");
+        }
+      });
+    });
+  }, 600000)
 });
 
 function handleResize() {
@@ -61,7 +74,7 @@ function displayImages(newState) {
     downloadFile(file, function(blob) {
       if (!blob) {
         console.log("File download error.")
-        setTimeout(displayImages, 1);
+        setTimeout(displayImages, 5000);
         return
       }
 
@@ -72,7 +85,9 @@ function displayImages(newState) {
       document.getElementById("image").onload = function() {
         onDone();
         document.getElementById("image").onload = null;
-        
+        window.URL.revokeObjectURL(this.src);
+        delete blob
+
         var imgRatio = img.width() / img.height();
 
         if (screenRatio < imgRatio) {
@@ -127,6 +142,7 @@ function retrieveImages() {
 function getFile(id, callback) {
   gapiRequest({
     path: "/drive/v2/files/" + id,
+    params: {cache: Math.random()*1000000},
     callback: callback
   });
 }
@@ -172,14 +188,17 @@ function downloadFile(file, callback) {
 
       errorSleep = 1000;
       callback(new Blob([this.response], {type: file.mimeType}));
+      delete this.response
     };
 
     xhr.onerror = function() {
+      console.log("Error: " + e.target.status);
       callback(null);
     };
 
     xhr.send();
   } else {
+    console.log("No file.downloadUrl!!!");
     callback(null);
   }
 }
